@@ -114,5 +114,4 @@ class DefaultController extends AbstractController
             'content' => $frontPage->getContent(),
         ));
     }
-       
 }

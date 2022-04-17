@@ -1,5 +1,5 @@
 {
-  "name": "mkpl/mksimplecmssymfonysix",
+  "name": "mkpl/mkfirmasymfony",
   "type": "project",
   "license": "properitary",
   "description": "",
@@ -22,8 +22,8 @@
     "symfony/security-bundle": "6.0.*",
     "symfony/serializer": "6.0.*",
     "symfony/twig-bundle": "6.0.*",
-    "symfony/orm-pack": "*.*",
-    "symfony/apache-pack": "*.*",
+    "symfony/apache-pack": "1.0.*",
+    "symfony/form": "6.0.*",
     "symfony/yaml": "6.0.*"
   },
   "require-dev": {

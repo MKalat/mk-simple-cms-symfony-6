@@ -40,7 +40,7 @@ class Pages
     /**
      * @return mixed
      */
-    public function getId()
+    public function getId(): ?int
     {
         return $this->id;
     }
@@ -48,7 +48,7 @@ class Pages
     /**
      * @param mixed $id
      */
-    public function setId($id)
+    public function setId(int $id)
     {
         $this->id = $id;
     }
@@ -56,7 +56,7 @@ class Pages
     /**
      * @return mixed
      */
-    public function getLink()
+    public function getLink(): string
     {
         return $this->link;
     }
@@ -64,7 +64,7 @@ class Pages
     /**
      * @param mixed $link
      */
-    public function setLink($link)
+    public function setLink(string $link)
     {
         $this->link = $link;
     }
@@ -72,7 +72,7 @@ class Pages
     /**
      * @return mixed
      */
-    public function getEtykieta()
+    public function getEtykieta(): string
     {
         return $this->etykieta;
     }
@@ -80,7 +80,7 @@ class Pages
     /**
      * @param mixed $etykieta
      */
-    public function setEtykieta($etykieta)
+    public function setEtykieta(string $etykieta)
     {
         $this->etykieta = $etykieta;
     }
@@ -88,7 +88,7 @@ class Pages
     /**
      * @return mixed
      */
-    public function getContent()
+    public function getContent(): string
     {
         return $this->content;
     }
@@ -96,7 +96,7 @@ class Pages
     /**
      * @param mixed $content
      */
-    public function setContent($content)
+    public function setContent(string $content)
     {
         $this->content = $content;
     }
@@ -104,7 +104,7 @@ class Pages
     /**
      * @return mixed
      */
-    public function getLang()
+    public function getLang(): string
     {
         return $this->lang;
     }
@@ -112,7 +112,7 @@ class Pages
     /**
      * @param mixed $lang
      */
-    public function setLang($lang)
+    public function setLang(string $lang)
     {
         $this->lang = $lang;
     }

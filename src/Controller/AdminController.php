@@ -3,7 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\Links;
+use App\Form\Type\LinkType;
 use App\Entity\Pages;
+use App\Form\Type\PageType;
+use App\Form\Type\UserType;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\Response;
@@ -89,26 +92,16 @@ class AdminController extends AbstractController
     }
 
     /**
-     * @Route("/admin/linksdelete", name="admin_links_delete")
+     * @Route("/admin/linksdelete/{id}", name="admin_links_delete")
      */
-    public function linksDeleteAction(Request $request, EntityManagerInterface $em)
+    public function linksDeleteAction(Request $request, EntityManagerInterface $em, $id)
     {
-        $data = $request->get('dataTables');
-        $ids  = $data['actions'];
+        $repository = $em->getRepository('App:Links');
+        $linkDetails = $repository->findOneBy(array('id' => $id));
 
-        $qb = $em->createQueryBuilder();
-        $qb->select('l');
-        $qb->from('App:Links', 'l');
-        $qb->where($qb->expr()->in('l.id', $ids));
-
-        //ArrayCollection
-        $result = $qb->getQuery()->getResult();
-
-        if ($result) {
-            foreach ($result as $link) {
-                $em->remove($link);
-                $em->flush();
-            }
+        if ($linkDetails) {
+            $em->remove($linkDetails);
+            $em->flush();
         }
         return $this->redirectToRoute("admin-links");
     }
@@ -153,41 +146,24 @@ class AdminController extends AbstractController
      */
     public function linksdetailsAction(Request $request, EntityManagerInterface $em, $id)
     {
-        //$id = $request->query->get('id');
-        $action = $request->request->get('Action');
         $repository = $em->getRepository('App:Links');
-
         $linkDetails = $repository->findOneBy(array('id' => $id));
 
-        if ($request->getRealMethod() == 'POST') {
-            if (!$linkDetails) {
-                $linkDetails = new Links();
-            }
-            if ($action == 'Save') {
-                $linkDetails->setPozycja($request->request->get('pozycja'));
-                $linkDetails->setEtykieta($request->request->get('etykieta'));
-                $linkDetails->setLink($request->request->get('link'));
-                $linkDetails->setStrona($request->request->get('strona'));
-                $linkDetails->setLang($request->request->get('lang'));
+        if (!$linkDetails) {
+            $linkDetails = new Links();
+        }
 
-                $entityManager = $em;
-                $entityManager->persist($linkDetails);
-                $entityManager->flush();
-            } elseif ($action == 'Delete') {
-                if ($linkDetails) {
-                    $em->remove($linkDetails);
-                    $em->flush();
-                }
-            }
+        $form = $this->createForm(LinkType::class, $linkDetails);
+
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $linkDetails = $form->getData();
+            $em->persist($linkDetails);
+            $em->flush();
             return $this->redirectToRoute("admin-links");
         }
-        if (!$linkDetails) {
-            $linkDetails = '';
-        }
-
-        return $this->render('admin/adminlinksdetails.html.twig', array(
-            'logs' => $linkDetails,
-
+        return $this->renderForm('admin/adminlinksdetails.html.twig', array(
+            'form' => $form,
         ));
     }
 
@@ -197,20 +173,17 @@ class AdminController extends AbstractController
     public function linkNewAction(Request $request, EntityManagerInterface $em)
     {
         $linkDetails = new Links();
-        if ($request->getRealMethod() == 'POST') {
-            $linkDetails->setPozycja($request->request->get('pozycja'));
-            $linkDetails->setEtykieta($request->request->get('etykieta'));
-            $linkDetails->setLink($request->request->get('link'));
-            $linkDetails->setStrona($request->request->get('strona'));
-            $linkDetails->setLang($request->request->get('lang'));
+        $form = $this->createForm(LinkType::class, $linkDetails);
 
-            $entityManager = $em;
-            $entityManager->persist($linkDetails);
-            $entityManager->flush();
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $linkDetails = $form->getData();
+            $em->persist($linkDetails);
+            $em->flush();
+            return $this->redirectToRoute("admin-links");
         }
-        return $this->render('admin/adminlinksdetails.html.twig', array(
-            'logs' => $linkDetails
-
+        return $this->renderForm('admin/adminlinksdetails.html.twig', array(
+            'form' => $form,
         ));
     }
 
@@ -223,27 +196,18 @@ class AdminController extends AbstractController
     }
 
     /**
-     * @Route("/admin/pagesdelete", name="admin_pages_delete")
+     * @Route("/admin/pagesdelete/{id}", name="admin_pages_delete")
      */
-    public function pagesDeleteAction(Request $request, EntityManagerInterface $em)
+    public function pagesDeleteAction(Request $request, EntityManagerInterface $em, $id)
     {
-        $data = $request->get('dataTables');
-        $ids  = $data['actions'];
+        $repository = $em->getRepository('App:Pages');
+        $pageDetails = $repository->findOneBy(array('id' => $id));
 
-        $qb = $em->createQueryBuilder();
-        $qb->select('p');
-        $qb->from('App:Pages', 'p');
-        $qb->where($qb->expr()->in('p.id', $ids));
-
-        //ArrayCollection
-        $result = $qb->getQuery()->getResult();
-
-        if ($result) {
-            foreach ($result as $page) {
-                $em->remove($page);
-                $em->flush();
-            }
+        if ($pageDetails) {
+            $em->remove($pageDetails);
+            $em->flush();
         }
+
         return $this->redirectToRoute("admin-pages");
     }
 
@@ -285,41 +249,24 @@ class AdminController extends AbstractController
      */
     public function pagesdetailsAction(Request $request, EntityManagerInterface $em, $id)
     {
-        //$id = $request->query->get('id');
-        $action = $request->request->get('Action');
         $repository = $em->getRepository('App:Pages');
-
         $pageDetails = $repository->findOneBy(array('id' => $id));
 
-        if ($request->getRealMethod() == 'POST') {
-            if (!$pageDetails) {
-                $pageDetails = new Pages();
-            }
-            if ($action == 'Save') {
-                $pageDetails->setEtykieta($request->request->get('etykieta'));
-                $pageDetails->setLink($request->request->get('link'));
-                $pageDetails->setLang($request->request->get('lang'));
-                $pageDetails->setContent($request->request->get('content'));
+        if (!$pageDetails) {
+            $pageDetails = new Links();
+        }
 
-                $entityManager = $em;
-                $entityManager->persist($pageDetails);
-                $entityManager->flush();
-            } elseif ($action == 'Delete') {
-                if ($pageDetails) {
-                    $em->remove($pageDetails);
-                    $em->flush();
-                }
-            }
+        $form = $this->createForm(PageType::class, $pageDetails);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $pageDetails = $form->getData();
+            $em->persist($pageDetails);
+            $em->flush();
             return $this->redirectToRoute("admin-pages");
         }
-
-        if (!$pageDetails) {
-            $pageDetails = '';
-        }
-
-        return $this->render('admin/adminpagesdetails.html.twig', array(
-            'logs' => $pageDetails,
-
+        return $this->renderForm('admin/adminpagesdetails.html.twig', array(
+            'form' => $form,
         ));
     }
 
@@ -329,20 +276,121 @@ class AdminController extends AbstractController
     public function pageNewAction(Request $request, EntityManagerInterface $em)
     {
         $pageDetails = new Pages();
-        if ($request->getRealMethod() == 'POST') {
-            $pageDetails->setEtykieta($request->request->get('etykieta'));
-            $pageDetails->setLink($request->request->get('link'));
-            $pageDetails->setLang($request->request->get('lang'));
-            $pageDetails->setContent($request->request->get('content'));
+        $form = $this->createForm(PageType::class, $pageDetails);
+        $form->handleRequest($request);
 
-            $entityManager = $em;
-            $entityManager->persist($pageDetails);
-            $entityManager->flush();
+        if ($form->isSubmitted() && $form->isValid()) {
+            $pageDetails = $form->getData();
+            $em->persist($pageDetails);
+            $em->flush();
+            return $this->redirectToRoute("admin-pages");
+        }
+        return $this->renderForm('admin/adminpagesdetails.html.twig', array(
+            'form' => $form,
+        ));
+    }
+
+    /**
+     * @Route("/admin/users", name="admin-users")
+     */
+    public function usersAction()
+    {
+        return $this->render('admin/users.html.twig');
+    }
+
+    /**
+     * @Route("/admin/usersAjax", name="admin_usersAjax")
+     */
+    public function usersAjaxAction(Request $request, Connection $connection, DataTablesSupport $dtSupp)
+    {
+        $cols = array(
+            array( "db" => "ID", "dt" => "0" ),
+            array( "db" => "username", "dt" => "1" ),
+            array( "db" => "password", "dt" => "2" ),
+            array( "db" => "email", "dt" => "3" ),
+            array( "db" => "is_active", "dt" => "4" ),
+        );
+
+        $limitSql = $dtSupp->limitData($request->query->all());
+        $orderSql = $dtSupp->orderData($request->query->all(), $cols);
+        $filterSql = $dtSupp->filterData($request->query->all(), $cols);
+
+        $logs_total = $connection->fetchAllAssociative("SELECT id, username, password, email, is_active FROM `users` ");
+
+        $logs_raw = $connection->fetchAllAssociative("SELECT id, username, password, email, is_active FROM `users` ".$filterSql.' '.$orderSql.' '.$limitSql);
+
+        $response = array();
+        $response['draw'] = intval($request->query->get('draw'));
+        $response["recordsTotal"] = count($logs_total);
+        $response["recordsFiltered"] = count($logs_total);
+        $response['data'] = array();
+
+        foreach ($logs_raw as $item) {
+            $response['data'][] = [$item['id'], $item['username'], $item['password'], $item['email'], $item['is_active']];
         }
 
-        return $this->render('admin/adminpagesdetails.html.twig', array(
-            'logs' => $pageDetails
+        return new Response(json_encode($response));
+    }
 
+    /**
+     * @Route("/admin/usersdetails/{id}", name="admin_users_details")
+     */
+    public function usersdetailsAction(Request $request, EntityManagerInterface $em, $id)
+    {
+        $repository = $em->getRepository('App:User');
+        $userDetails = $repository->findOneBy(array('id' => $id));
+
+        if (!$userDetails) {
+            $userDetails = new User();
+        }
+
+        $form = $this->createForm(UserType::class, $userDetails);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $userDetails = $form->getData();
+            $em->persist($userDetails);
+            $em->flush();
+            return $this->redirectToRoute("admin-users");
+        }
+        return $this->renderForm('admin/adminusersdetails.html.twig', array(
+            'form' => $form,
         ));
+    }
+
+    /**
+     * @Route("/admin/usersnew", name="new-user")
+     */
+    public function userNewAction(Request $request, EntityManagerInterface $em)
+    {
+        $userDetails = new User();
+        $form = $this->createForm(UserType::class, $userDetails);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $userDetails = $form->getData();
+            $em->persist($userDetails);
+            $em->flush();
+            return $this->redirectToRoute("admin-users");
+        }
+        return $this->renderForm('admin/adminusersdetails.html.twig', array(
+            'form' => $form,
+        ));
+    }
+
+    /**
+     * @Route("/admin/usersdelete/{id}", name="admin_users_delete")
+     */
+    public function usersDeleteAction(Request $request, EntityManagerInterface $em, $id)
+    {
+        $repository = $em->getRepository('App:User');
+        $userDetails = $repository->findOneBy(array('id' => $id));
+
+        if ($userDetails) {
+            $em->remove($userDetails);
+            $em->flush();
+        }
+
+        return $this->redirectToRoute("admin-users");
     }
 }
